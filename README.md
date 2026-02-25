@@ -69,8 +69,7 @@ Provides rate payloads using Product Dictionary identifiers, including:
 
 ## Scenario mappings (initial focus)
 1. **Push New Issue Rates** – Push bulk new business rates for CUSIPs available for sale now, shared at a product level (e.g., fixed interest rate, RILA/FIA cap and step rates).
-2. **Pull New Issue Rates** – Pull new business rates for a single CUSIP available for sale now, shared at a product level (e.g., fixed interest rate, RILA/FIA cap and step rates).
-3. **Renewal Rates** – Provide renewal rate options for contracts approaching renewal, including retrieval at the product level.
+2. **Renewal Rates** – Provide renewal rate options for contracts approaching renewal, including retrieval at the product level.
 
 Day 2 items to be prioritized and better defined later:
 - **Contract-Specific Renewal Rates** – Renewal rates for a specific contract based on product, state, issue date, renewal date, etc.
@@ -78,10 +77,10 @@ Day 2 items to be prioritized and better defined later:
    - Example: a client elects a GWBL rider where accumulation rate is 6% and withdrawal rate is 7%.
 
 ## How to engage, contribute, and give feedback
-- These working groups are being coordinated by Nicholas Palmer <Nicholas.Palmer@icapital.com>** (Champion) .
+- These working groups are being coordinated by Nicholas Palmer <Nicholas.Palmer@icapital.com>** (Champion) and Sheldon DSouza <sheldon.dsouza@icapital.com>** (Tech-Champion).
 - Please contact the business owners or IRI (hpikus@irionline.org or kdease@irionline.org) to get added to the working group discussions.
 
-## Change subsmissions and reporting issues and bugs
+## Change submissions and reporting issues and bugs
 
 Security issues should be reported directly to Katherine Dease kdease@irionline.org. Issues and bugs can be reported directly within the issues tab of a repository. Change requests should follow the standards governance workflow outlined on the [main page](https://github.com/Insured-Retirement-Institute).
 
