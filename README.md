@@ -86,4 +86,4 @@ Security issues should be reported directly to Katherine Dease kdease@irionline.
 
 ## Code of conduct
 
-See [style guide](https://github.com/Insured-Retirement-Institute/Style-Guide)
+See [Digital-First-Specifications](https://github.com/Insured-Retirement-Institute/Digital-First-Specifications) repository
