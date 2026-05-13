@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "projections": {
+    "openapi": {
+      "plugins": {
+        "openapi": {
+          "service": "iri.rates.productdictionary#ProductDictionaryService",
+          "protocol": "aws.protocols#restJson1"
+        }
+      }
+    }
+  }
+}
