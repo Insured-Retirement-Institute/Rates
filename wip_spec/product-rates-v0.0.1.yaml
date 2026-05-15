@@ -1,0 +1,346 @@
+openapi: 3.1.0
+info:
+  title: IRI Rate API
+  version: 0.1.0
+  description: 'Rate API — transmits current and upcoming rate values for annuity products.
+
+    Recipients must also consume the Product Dictionary API to resolve identifiers.'
+paths:
+  /v1/product-rates/{id}:
+    get:
+      description: 'Returns rate information for a single product identified by its id.
+
+        Use the Product Dictionary API to resolve surrender period, premium band,
+
+        and strategy identifiers in the response.
+
+
+        All query parameters accept a single value only. If a query parameter is
+
+        repeated (e.g. `?scope=NEW_BUSINESS&scope=GMIR`), the server will reject
+
+        the request with a 400 ValidationError. Clients must supply at most one
+
+        value per parameter.'
+      operationId: GetProductRate
+      parameters:
+      - name: id
+        in: path
+        description: Product identifier from the Product Dictionary.
+        schema:
+          type: string
+          description: Product identifier from the Product Dictionary.
+        required: true
+      - name: scope
+        in: query
+        description: Rate scope to retrieve (e.g. newBusiness, gmir). Single value only.
+        schema:
+          $ref: '#/components/schemas/RateScope'
+      - name: effectiveDate
+        in: query
+        description: 'Effective date filter (yyyy-MM-dd). Returns the rate effective on this date.
+
+          Single value only.'
+        schema:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: 'Effective date filter (yyyy-MM-dd). Returns the rate effective on this date.
+
+            Single value only.'
+      - name: correlationId
+        in: header
+        description: Optional correlation identifier for cross-system tracing.
+        schema:
+          type: string
+          description: Optional correlation identifier for cross-system tracing.
+      responses:
+        '200':
+          description: GetProductRate 200 response
+          headers:
+            correlationId:
+              description: Echoed correlation identifier from the request.
+              schema:
+                type: string
+                description: Echoed correlation identifier from the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductRateResponseContent'
+        '400':
+          description: ClientError 400 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientErrorResponseContent'
+        '403':
+          description: ForbiddenError 403 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenErrorResponseContent'
+        '500':
+          description: ServerError 500 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponseContent'
+components:
+  schemas:
+    ClientErrorResponseContent:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorResponse'
+      required:
+      - error
+    ComponentType:
+      type: string
+      description: 'Crediting strategy component type.
+
+
+        Upside components define the performance ceiling or participation:
+
+        cap, participation, spread, fixed, performanceTrigger, tier.
+
+
+        Downside components define loss protection:
+
+        buffer, floor, barrier, downsideParticipation.
+
+
+        The absence of any downside component implies full downside protection.
+
+        For a fully unprotected strategy use downsideParticipation with value = 1.'
+      enum:
+      - cap
+      - participation
+      - spread
+      - fixed
+      - performanceTrigger
+      - tier
+      - buffer
+      - floor
+      - barrier
+      - downsideParticipation
+    ErrorResponse:
+      type: object
+      description: Standard error response body per IRI Digital-First-Specifications.
+      properties:
+        httpStatus:
+          type: number
+          description: Numeric HTTP status code (400–599).
+        code:
+          type: string
+          description: 'Machine-readable structured identifier in domain.category.subcategory format
+
+            (e.g. "rates.validation.missingField").'
+        timestamp:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          description: Timestamp when the error was generated.
+        correlationId:
+          type: string
+          description: Carries forward the inbound request's correlationId for cross-system tracing.
+        message:
+          type: string
+          description: Developer-focused technical explanation.
+        userMessage:
+          type: string
+          description: End-user-friendly explanation, safe to display in portals.
+        validationErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationErrorDetail'
+          description: Domain or business rule violations. Each entry has its own code and message.
+      required:
+      - code
+      - correlationId
+      - httpStatus
+      - message
+      - timestamp
+      - userMessage
+    ForbiddenErrorResponseContent:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorResponse'
+      required:
+      - error
+    GetProductRateResponseContent:
+      type: object
+      properties:
+        rates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductRate'
+          minItems: 1
+      required:
+      - rates
+    ProductRate:
+      type: object
+      description: 'A rate entry for a single product covering one or more surrender period /
+
+        premium band combinations and their associated strategy components.'
+      properties:
+        id:
+          type: string
+          description: Product identifier. The source system is indicated by idSource.
+        idSource:
+          $ref: '#/components/schemas/RateIdSource'
+        variationId:
+          type: string
+          description: Distributor- or carrier-specific product variation identifier.
+        rateVariationId:
+          type: string
+          description: Firm-specific rate variation identifier (e.g. a firm override identifier).
+        scope:
+          $ref: '#/components/schemas/RateScope'
+        effectiveDate:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: Date the rate takes effect in the market (yyyy-MM-dd).
+        expiryDate:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: 'Date the rate is no longer available.
+
+            If absent, the rate is valid until a new one is published or received.'
+        sweepDate:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: 'Date funds allocated to a strategy begin earning interest.
+
+            If absent, assumed equal to effectiveDate.'
+        publishingDate:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: Date a future rate may be publicized as upcoming.
+        created:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          description: Timestamp when this rate entry was created. For downstream change tracking.
+        modified:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          description: Timestamp when this rate entry was last modified. For downstream change tracking.
+        rates:
+          type: array
+          items:
+            $ref: '#/components/schemas/RateGroup'
+          minItems: 1
+          description: 'Rate values grouped by surrender period and premium band combinations.
+
+            Each group contains the strategies and their component rates.'
+      required:
+      - created
+      - effectiveDate
+      - id
+      - idSource
+      - modified
+      - rates
+      - scope
+    RateComponent:
+      type: object
+      description: 'A single rate component — the atomic unit of strategy rate transmission.
+
+
+        Values are expressed as decimals (0.25 = 25%). A value of 9999 means uncapped.
+
+        The absence of a downside component implies full downside protection.'
+      properties:
+        type:
+          $ref: '#/components/schemas/ComponentType'
+        value:
+          type: number
+          description: Rate value as a decimal. 9999 = uncapped/infinite.
+          format: double
+      required:
+      - type
+      - value
+    RateGroup:
+      type: object
+      description: 'A grouping of strategies keyed by a specific surrender period and premium band.
+
+        Both identifiers are defined in the Product Dictionary API.'
+      properties:
+        bandId:
+          type: string
+          description: Premium band identifier from the Product Dictionary.
+        surrenderPeriodId:
+          type: string
+          description: Surrender period identifier from the Product Dictionary.
+        strategies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Strategy'
+          minItems: 1
+          description: Strategies and their rate components for this band/period combination.
+      required:
+      - bandId
+      - strategies
+      - surrenderPeriodId
+    RateIdSource:
+      type: string
+      description: Source system for the product identifier in a rate entry.
+      enum:
+      - productDictionary
+      - acord
+    RateScope:
+      type: string
+      description: Scope of the rate being communicated.
+      enum:
+      - newBusiness
+      - gmir
+      - bailout
+    ServerErrorResponseContent:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorResponse'
+      required:
+      - error
+    Strategy:
+      type: object
+      description: 'A strategy within a rate group, identified by its Product Dictionary id,
+
+        with optional jurisdiction scoping and an associated feature.'
+      properties:
+        id:
+          type: string
+          description: Strategy identifier from the Product Dictionary.
+        applicableJurisdictions:
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Z]{2}-[A-Z0-9]{1,3}$
+            description: ISO 3166-2 jurisdiction code — always country + subdivision (e.g. "US-CA", "US-TX").
+          description: 'ISO 3166-2 jurisdictions this strategy rate applies to.
+
+            If absent, applies to all jurisdictions.'
+        featureIds:
+          type: array
+          items:
+            type: string
+          description: Optional feature identifiers (e.g. riders) associated with this strategy rate.
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/RateComponent'
+          minItems: 1
+          description: Rate components that define the strategy's performance parameters.
+      required:
+      - components
+      - id
+    ValidationErrorDetail:
+      type: object
+      description: A single domain or business rule violation within an error response.
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code (e.g. "rates.validation.premiumBandOverlap").
+        message:
+          type: string
+          description: Human-readable description of the violation.
+      required:
+      - code
+      - message
