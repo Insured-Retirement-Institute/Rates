@@ -19,6 +19,7 @@ service RateApiService {
     ]
     errors: [
         ClientError
+        ForbiddenError
         ServerError
     ]
 }
@@ -34,7 +35,7 @@ service RateApiService {
 /// the request with a 400 ValidationError. Clients must supply at most one
 /// value per parameter.
 @readonly
-@http(method: "GET", uri: "/product-rates/{id}")
+@http(method: "GET", uri: "/v1/product-rates/{id}")
 operation GetProductRate {
     input: GetProductRateInput
     output: GetProductRateOutput
@@ -44,12 +45,16 @@ operation GetProductRate {
 // ─── Input / Output shapes ────────────────────────────────────────────────────
 
 structure GetProductRateInput {
+    /// Optional correlation identifier for cross-system tracing.
+    @httpHeader("correlationId")
+    correlationId: String
+
     /// Product identifier from the Product Dictionary.
     @required
     @httpLabel
     id: String
 
-    /// Rate scope to retrieve (e.g. NEW_BUSINESS, GMIR). Single value only.
+    /// Rate scope to retrieve (e.g. newBusiness, gmir). Single value only.
     @httpQuery("scope")
     scope: RateScope
 
@@ -60,6 +65,10 @@ structure GetProductRateInput {
 }
 
 structure GetProductRateOutput {
+    /// Echoed correlation identifier from the request.
+    @httpHeader("correlationId")
+    correlationId: String
+
     @required
     rates: ProductRateList
 }
@@ -181,67 +190,67 @@ structure RateComponent {
 /// Source system for the product identifier in a rate entry.
 enum RateIdSource {
     /// Identifier originates from the IRI Product Dictionary API.
-    PRODUCT_DICTIONARY
+    productDictionary
 
     /// Identifier originates from ACORD PPFA Spec.
-    ACORD
+    acord
 }
 
 /// Scope of the rate being communicated.
 enum RateScope {
     /// Rate applies to newly issued contracts.
-    NEW_BUSINESS
+    newBusiness
 
     /// Guaranteed Minimum Interest Rate floor.
-    GMIR
+    gmir
 
     /// Bailout rate condition.
-    BAILOUT
+    bailout
 }
 
 /// Crediting strategy component type.
 ///
 /// Upside components define the performance ceiling or participation:
-/// CAP, PARTICIPATION, SPREAD, FIXED, PERFORMANCE_TRIGGER, TIER.
+/// cap, participation, spread, fixed, performanceTrigger, tier.
 ///
 /// Downside components define loss protection:
-/// BUFFER, FLOOR, BARRIER, DOWNSIDE_PARTICIPATION.
+/// buffer, floor, barrier, downsideParticipation.
 ///
 /// The absence of any downside component implies full downside protection.
-/// For a fully unprotected strategy use DOWNSIDE_PARTICIPATION with value = 1.
+/// For a fully unprotected strategy use downsideParticipation with value = 1.
 enum ComponentType {
     // ── Upside ──────────────────────────────────────────────────────────────
     /// Maximum return limit. Value = cap rate (e.g. 0.10 = 10% cap).
-    CAP
+    cap
 
     /// Percentage of index gain credited. Value = participation rate (e.g. 0.50 = 50%).
-    PARTICIPATION
+    participation
 
     /// Deduction from index return. Value = spread rate (e.g. 0.02 = 2%).
-    SPREAD
+    spread
 
     /// Guaranteed credit independent of index performance. Value = fixed rate.
-    FIXED
+    fixed
 
     /// Threshold-based crediting. Value = trigger level (e.g. 0.05 = 5%).
-    PERFORMANCE_TRIGGER
+    performanceTrigger
 
     /// Multi-level rate structure boundary. Value = tier threshold.
-    TIER
+    tier
 
     // ── Downside ────────────────────────────────────────────────────────────
     /// Loss absorbed before client exposure begins. Value = buffer percentage (e.g. 0.20 = 20%).
-    BUFFER
+    buffer
 
     /// Maximum permitted loss over the term. Value = absolute loss limit (e.g. 0.20 = -20% floor).
-    FLOOR
+    floor
 
     /// Downside threshold beyond which losses are incurred. Value = barrier percentage.
-    BARRIER
+    barrier
 
     /// Percentage of index loss applied to the client. Value = downside participation rate.
     /// Use value = 1 for a fully unprotected strategy.
-    DOWNSIDE_PARTICIPATION
+    downsideParticipation
 }
 
 // ─── List types ───────────────────────────────────────────────────────────────
@@ -276,6 +285,13 @@ list FeatureIdList {
 @error("client")
 @httpError(400)
 structure ClientError {
+    @required
+    error: ErrorResponse
+}
+
+@error("client")
+@httpError(403)
+structure ForbiddenError {
     @required
     error: ErrorResponse
 }

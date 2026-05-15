@@ -21,6 +21,7 @@ service ProductDictionaryService {
     ]
     errors: [
         ClientError
+        ForbiddenError
         NotFoundError
         ServerError
     ]
@@ -30,7 +31,7 @@ service ProductDictionaryService {
 
 /// Returns a paginated list of all products in the dictionary.
 @readonly
-@http(method: "GET", uri: "/product-dictionary")
+@http(method: "GET", uri: "/v1/product-dictionary")
 operation ListProducts {
     input: ListProductsInput
     output: ListProductsOutput
@@ -38,7 +39,7 @@ operation ListProducts {
 
 /// Returns a single product by its internal id.
 @readonly
-@http(method: "GET", uri: "/product-dictionary/{id}")
+@http(method: "GET", uri: "/v1/product-dictionary/{id}")
 operation GetProduct {
     input: GetProductInput
     output: GetProductOutput
@@ -48,6 +49,10 @@ operation GetProduct {
 // ─── Input / Output shapes ────────────────────────────────────────────────────
 
 structure ListProductsInput {
+    /// Optional correlation identifier for cross-system tracing.
+    @httpHeader("correlationId")
+    correlationId: String
+
     /// Return only products with this idSource (e.g. CUSIP).
     @httpQuery("idSource")
     idSource: String
@@ -62,6 +67,10 @@ structure ListProductsInput {
 }
 
 structure ListProductsOutput {
+    /// Echoed correlation identifier from the request.
+    @httpHeader("correlationId")
+    correlationId: String
+
     @required
     products: ProductList
 
@@ -87,12 +96,20 @@ structure PaginationMetadata {
 }
 
 structure GetProductInput {
+    /// Optional correlation identifier for cross-system tracing.
+    @httpHeader("correlationId")
+    correlationId: String
+
     @required
     @httpLabel
     id: String
 }
 
 structure GetProductOutput {
+    /// Echoed correlation identifier from the request.
+    @httpHeader("correlationId")
+    correlationId: String
+
     @required
     product: Product
 }
@@ -243,10 +260,10 @@ string SurrenderPeriodDuration
 /// Source system that minted a product identifier.
 enum IdSource {
     /// CUSIP — Committee on Uniform Securities Identification Procedures identifier.
-    CUSIP
+    cusip
 
     /// Internal proprietary identifier assigned by the carrier or platform.
-    INTERNAL
+    internal
 }
 
 // ─── List types ───────────────────────────────────────────────────────────────
@@ -282,6 +299,13 @@ list FeatureList {
 @error("client")
 @httpError(400)
 structure ClientError {
+    @required
+    error: ErrorResponse
+}
+
+@error("client")
+@httpError(403)
+structure ForbiddenError {
     @required
     error: ErrorResponse
 }

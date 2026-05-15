@@ -9,11 +9,21 @@
     ]
   },
   "projections": {
-    "openapi": {
+    "product-dictionary-openapi": {
       "plugins": {
         "openapi": {
           "service": "iri.rates.productdictionary#ProductDictionaryService",
-          "protocol": "aws.protocols#restJson1"
+          "protocol": "aws.protocols#restJson1",
+          "version": "3.1.0"
+        }
+      }
+    },
+    "rate-api-openapi": {
+      "plugins": {
+        "openapi": {
+          "service": "iri.rates.rateapi#RateApiService",
+          "protocol": "aws.protocols#restJson1",
+          "version": "3.1.0"
         }
       }
     }

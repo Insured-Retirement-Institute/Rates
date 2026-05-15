@@ -25,8 +25,8 @@ list JurisdictionList {
 
 // ─── Standard error schema ────────────────────────────────────────────────────
 // Per Digital-First-Specifications: every error response (400–599) must include
-// httpStatus, code (domain.category.subcategory), correlationId, message,
-// and an optional validationErrors array.
+// httpStatus, code (domain.category.subcategory), timestamp, correlationId,
+// technical message, userMessage, and an optional validationErrors array.
 
 /// Standard error response body per IRI Digital-First-Specifications.
 structure ErrorResponse {
@@ -39,13 +39,21 @@ structure ErrorResponse {
     @required
     code: String
 
+    /// Timestamp when the error was generated.
+    @required
+    timestamp: AuditTimestamp
+
     /// Carries forward the inbound request's correlationId for cross-system tracing.
     @required
     correlationId: String
 
-    /// End-user-friendly explanation, safe to display in portals.
+    /// Developer-focused technical explanation.
     @required
     message: String
+
+    /// End-user-friendly explanation, safe to display in portals.
+    @required
+    userMessage: String
 
     /// Domain or business rule violations. Each entry has its own code and message.
     validationErrors: ValidationErrorList
