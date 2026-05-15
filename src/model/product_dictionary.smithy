@@ -4,6 +4,10 @@ namespace iri.rates.productdictionary
 
 use aws.protocols#restJson1
 use iri.rates.traits#noOverlappingRanges
+use iri.rates.common#ISO8601Date
+use iri.rates.common#JurisdictionCode
+use iri.rates.common#JurisdictionList
+use iri.rates.common#ErrorResponse
 
 /// Product Dictionary API — provides authoritative reference data for annuity
 /// products so downstream rate workflows can use consistent identifiers and structures.
@@ -16,9 +20,9 @@ service ProductDictionaryService {
         GetProduct
     ]
     errors: [
-        ValidationError
+        ClientError
         NotFoundError
-        InternalServerError
+        ServerError
     ]
 }
 
@@ -26,7 +30,7 @@ service ProductDictionaryService {
 
 /// Returns a paginated list of all products in the dictionary.
 @readonly
-@http(method: "GET", uri: "/products")
+@http(method: "GET", uri: "/product-dictionary")
 operation ListProducts {
     input: ListProductsInput
     output: ListProductsOutput
@@ -34,11 +38,11 @@ operation ListProducts {
 
 /// Returns a single product by its internal id.
 @readonly
-@http(method: "GET", uri: "/products/{id}")
+@http(method: "GET", uri: "/product-dictionary/{id}")
 operation GetProduct {
     input: GetProductInput
     output: GetProductOutput
-    errors: [NotFoundError]
+    errors: [NotFoundError, ClientError]
 }
 
 // ─── Input / Output shapes ────────────────────────────────────────────────────
@@ -48,21 +52,38 @@ structure ListProductsInput {
     @httpQuery("idSource")
     idSource: String
 
-    /// Opaque pagination cursor returned in a prior response.
-    @httpQuery("nextToken")
-    nextToken: String
+    /// Zero-based offset of the first item to return (default 0).
+    @httpQuery("offset")
+    offset: Integer
 
-    /// Maximum number of items to return (1–100, default 50).
-    @httpQuery("maxResults")
-    maxResults: Integer
+    /// Maximum number of items to return per page (default 50).
+    @httpQuery("limit")
+    limit: Integer
 }
 
 structure ListProductsOutput {
     @required
     products: ProductList
 
-    /// Present when additional pages exist.
-    nextToken: String
+    @required
+    metadata: PaginationMetadata
+}
+
+/// Offset-based pagination metadata included in list responses.
+structure PaginationMetadata {
+    /// Zero-based offset of the first item in the current page.
+    @required
+    offset: Integer
+
+    /// Maximum number of items requested for this page.
+    @required
+    limit: Integer
+
+    /// Offset to use for the next page. Absent when there are no more pages.
+    nextOffset: Integer
+
+    /// Total number of items across all pages. May be absent if the total is unknown.
+    totalCount: Integer
 }
 
 structure GetProductInput {
@@ -228,16 +249,6 @@ enum IdSource {
     INTERNAL
 }
 
-// ─── Shared simple types ──────────────────────────────────────────────────────
-
-/// Calendar date in yyyy-MM-dd format.
-@pattern("^\\d{4}-\\d{2}-\\d{2}$")
-string ISO8601Date
-
-/// ISO 3166-2 jurisdiction code (e.g. "US-CA", "US-TX").
-@pattern("^[A-Z]{2}(-[A-Z0-9]{1,3})?$")
-string JurisdictionCode
-
 // ─── List types ───────────────────────────────────────────────────────────────
 
 @length(min: 1)
@@ -265,37 +276,26 @@ list FeatureList {
     member: Feature
 }
 
-list JurisdictionList {
-    member: JurisdictionCode
-}
-
 // ─── Errors ───────────────────────────────────────────────────────────────────
+// All error responses use the shared ErrorResponse body from iri.rates.common.
 
 @error("client")
 @httpError(400)
-structure ValidationError {
+structure ClientError {
     @required
-    message: String
-
-    /// Map of field name → error description.
-    fieldErrors: FieldErrorMap
+    error: ErrorResponse
 }
 
 @error("client")
 @httpError(404)
 structure NotFoundError {
     @required
-    message: String
+    error: ErrorResponse
 }
 
 @error("server")
 @httpError(500)
-structure InternalServerError {
+structure ServerError {
     @required
-    message: String
-}
-
-map FieldErrorMap {
-    key: String
-    value: String
+    error: ErrorResponse
 }
