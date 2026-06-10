@@ -53,25 +53,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClientErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: ForbiddenError 403 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ForbiddenErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: NotFoundError 404 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: ServerError 500 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/product-dictionary/{id}:
     get:
       description: Returns a single product by its internal id.
@@ -106,34 +106,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClientErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: ForbiddenError 403 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ForbiddenErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: NotFoundError 404 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotFoundErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: ServerError 500 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ClientErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     ErrorResponse:
       type: object
       description: Standard error response body per IRI Digital-First-Specifications.
@@ -148,7 +141,7 @@ components:
             (e.g. "rates.validation.missingField").'
         timestamp:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          format: date-time
           description: Timestamp when the error was generated.
         correlationId:
           type: string
@@ -159,11 +152,6 @@ components:
         userMessage:
           type: string
           description: End-user-friendly explanation, safe to display in portals.
-        validationErrors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidationErrorDetail'
-          description: Domain or business rule violations. Each entry has its own code and message.
       required:
       - code
       - correlationId
@@ -183,11 +171,11 @@ components:
           description: Human-readable feature / rider name.
         effectiveDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date the feature became available (yyyy-MM-dd).
         expiryDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date the feature is no longer available (yyyy-MM-dd). Absent means open-ended.
         applicableJurisdictions:
           type: array
@@ -202,13 +190,6 @@ components:
       - displayName
       - effectiveDate
       - id
-    ForbiddenErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     GetProductResponseContent:
       type: object
       properties:
@@ -235,13 +216,6 @@ components:
       required:
       - metadata
       - products
-    NotFoundErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     PaginationMetadata:
       type: object
       description: Offset-based pagination metadata included in list responses.
@@ -313,11 +287,11 @@ components:
           description: Human-readable name of the DTCC member / distributor.
         effectiveDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date the product became available for new business (yyyy-MM-dd).
         expiryDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: 'Date after which the product is no longer available for new business (yyyy-MM-dd).
 
             Absent means open-ended.'
@@ -357,13 +331,6 @@ components:
       - premiumBands
       - strategies
       - surrenderPeriods
-    ServerErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     Strategy:
       type: object
       description: A crediting strategy available on the product (e.g. "1-Year Point-to-Point").
@@ -376,11 +343,11 @@ components:
           description: Human-readable strategy name.
         effectiveDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date the strategy became available (yyyy-MM-dd).
         expiryDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date the strategy is no longer available (yyyy-MM-dd). Absent means open-ended.
         applicableJurisdictions:
           type: array
@@ -409,16 +376,3 @@ components:
       required:
       - id
       - period
-    ValidationErrorDetail:
-      type: object
-      description: A single domain or business rule violation within an error response.
-      properties:
-        code:
-          type: string
-          description: Machine-readable error code (e.g. "rates.validation.premiumBandOverlap").
-        message:
-          type: string
-          description: Human-readable description of the violation.
-      required:
-      - code
-      - message

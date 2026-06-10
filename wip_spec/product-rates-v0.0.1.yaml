@@ -43,7 +43,7 @@ paths:
           Single value only.'
         schema:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: 'Effective date filter (yyyy-MM-dd). Returns the rate effective on this date.
 
             Single value only.'
@@ -71,28 +71,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClientErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '403':
           description: ForbiddenError 403 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ForbiddenErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: ServerError 500 response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerErrorResponseContent'
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ClientErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     ComponentType:
       type: string
       description: 'Crediting strategy component type.
@@ -136,7 +129,7 @@ components:
             (e.g. "rates.validation.missingField").'
         timestamp:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          format: date-time
           description: Timestamp when the error was generated.
         correlationId:
           type: string
@@ -147,11 +140,6 @@ components:
         userMessage:
           type: string
           description: End-user-friendly explanation, safe to display in portals.
-        validationErrors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidationErrorDetail'
-          description: Domain or business rule violations. Each entry has its own code and message.
       required:
       - code
       - correlationId
@@ -159,13 +147,6 @@ components:
       - message
       - timestamp
       - userMessage
-    ForbiddenErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     GetProductRateResponseContent:
       type: object
       properties:
@@ -197,31 +178,31 @@ components:
           $ref: '#/components/schemas/RateScope'
         effectiveDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date the rate takes effect in the market (yyyy-MM-dd).
         expiryDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: 'Date the rate is no longer available.
 
             If absent, the rate is valid until a new one is published or received.'
         sweepDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: 'Date funds allocated to a strategy begin earning interest.
 
             If absent, assumed equal to effectiveDate.'
         publishingDate:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2}$
+          format: date
           description: Date a future rate may be publicized as upcoming.
         created:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          format: date-time
           description: Timestamp when this rate entry was created. For downstream change tracking.
         modified:
           type: string
-          pattern: ^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$
+          format: date-time
           description: Timestamp when this rate entry was last modified. For downstream change tracking.
         rates:
           type: array
@@ -292,13 +273,6 @@ components:
       - newBusiness
       - gmir
       - bailout
-    ServerErrorResponseContent:
-      type: object
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorResponse'
-      required:
-      - error
     Strategy:
       type: object
       description: 'A strategy within a rate group, identified by its Product Dictionary id,
@@ -331,16 +305,3 @@ components:
       required:
       - components
       - id
-    ValidationErrorDetail:
-      type: object
-      description: A single domain or business rule violation within an error response.
-      properties:
-        code:
-          type: string
-          description: Machine-readable error code (e.g. "rates.validation.premiumBandOverlap").
-        message:
-          type: string
-          description: Human-readable description of the violation.
-      required:
-      - code
-      - message
