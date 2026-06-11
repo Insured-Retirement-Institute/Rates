@@ -279,10 +279,10 @@ components:
         variationId:
           type: string
           description: Populated only when this record is a variation of a generic product.
-        dtccCode:
+        associatedFirmCode:
           type: string
           description: DTCC member code identifying a distributor-specific variation.
-        dtccMemberName:
+        associatedFirmName:
           type: string
           description: Human-readable name of the DTCC member / distributor.
         effectiveDate:
