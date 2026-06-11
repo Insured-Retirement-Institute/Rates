@@ -281,10 +281,10 @@ components:
           description: Populated only when this record is a variation of a generic product.
         associatedFirmCode:
           type: string
-          description: DTCC member code identifying a distributor-specific variation.
+          description: Standard member code identifier to represent a distributor-specific variation.
         associatedFirmName:
           type: string
-          description: Human-readable name of the DTCC member / distributor.
+          description: Human-readable name of the member / distributor.
         effectiveDate:
           type: string
           format: date
