@@ -1,0 +1,378 @@
+openapi: 3.1.0
+info:
+  title: IRI Product Dictionary API
+  version: 0.0.1
+  description: 'Product Dictionary API — provides authoritative reference data for annuity
+
+    products so downstream rate workflows can use consistent identifiers and structures.'
+paths:
+  /v1/product-dictionary:
+    get:
+      description: Returns a paginated list of all products in the dictionary.
+      operationId: ListProducts
+      parameters:
+      - name: idSource
+        in: query
+        description: Return only products with this idSource (e.g. CUSIP).
+        schema:
+          type: string
+          description: Return only products with this idSource (e.g. CUSIP).
+      - name: offset
+        in: query
+        description: Zero-based offset of the first item to return (default 0).
+        schema:
+          type: number
+          description: Zero-based offset of the first item to return (default 0).
+      - name: limit
+        in: query
+        description: Maximum number of items to return per page (default 50).
+        schema:
+          type: number
+          description: Maximum number of items to return per page (default 50).
+      - name: correlationId
+        in: header
+        description: Optional correlation identifier for cross-system tracing.
+        schema:
+          type: string
+          description: Optional correlation identifier for cross-system tracing.
+      responses:
+        '200':
+          description: ListProducts 200 response
+          headers:
+            correlationId:
+              description: Echoed correlation identifier from the request.
+              schema:
+                type: string
+                description: Echoed correlation identifier from the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProductsResponseContent'
+        '400':
+          description: ClientError 400 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: ForbiddenError 403 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: NotFoundError 404 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: ServerError 500 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/product-dictionary/{id}:
+    get:
+      description: Returns a single product by its internal id.
+      operationId: GetProduct
+      parameters:
+      - name: id
+        in: path
+        schema:
+          type: string
+        required: true
+      - name: correlationId
+        in: header
+        description: Optional correlation identifier for cross-system tracing.
+        schema:
+          type: string
+          description: Optional correlation identifier for cross-system tracing.
+      responses:
+        '200':
+          description: GetProduct 200 response
+          headers:
+            correlationId:
+              description: Echoed correlation identifier from the request.
+              schema:
+                type: string
+                description: Echoed correlation identifier from the request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProductResponseContent'
+        '400':
+          description: ClientError 400 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: ForbiddenError 403 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: NotFoundError 404 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: ServerError 500 response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Standard error response body per IRI Digital-First-Specifications.
+      properties:
+        httpStatus:
+          type: number
+          description: Numeric HTTP status code (400–599).
+        code:
+          type: string
+          description: 'Machine-readable structured identifier in domain.category.subcategory format
+
+            (e.g. "rates.validation.missingField").'
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error was generated.
+        correlationId:
+          type: string
+          description: Carries forward the inbound request's correlationId for cross-system tracing.
+        message:
+          type: string
+          description: Developer-focused technical explanation.
+        userMessage:
+          type: string
+          description: End-user-friendly explanation, safe to display in portals.
+      required:
+      - code
+      - correlationId
+      - httpStatus
+      - message
+      - timestamp
+      - userMessage
+    Feature:
+      type: object
+      description: An optional rider or product feature (e.g. "GWBL Rider").
+      properties:
+        id:
+          type: string
+          description: Stable identifier referenced by Rate API payloads.
+        displayName:
+          type: string
+          description: Human-readable feature / rider name.
+        effectiveDate:
+          type: string
+          format: date
+          description: Date the feature became available (yyyy-MM-dd).
+        expiryDate:
+          type: string
+          format: date
+          description: Date the feature is no longer available (yyyy-MM-dd). Absent means open-ended.
+        applicableJurisdictions:
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Z]{2}-[A-Z0-9]{1,3}$
+            description: ISO 3166-2 jurisdiction code — always country + subdivision (e.g. "US-CA", "US-TX").
+          description: 'ISO 3166-2 jurisdiction codes in which the feature is available.
+
+            When absent the feature is available in all jurisdictions.'
+      required:
+      - displayName
+      - effectiveDate
+      - id
+    GetProductResponseContent:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/Product'
+      required:
+      - product
+    IdSource:
+      type: string
+      description: Source system that minted a product identifier.
+      enum:
+      - cusip
+      - internal
+    ListProductsResponseContent:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+          minItems: 1
+        metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+      required:
+      - metadata
+      - products
+    PaginationMetadata:
+      type: object
+      description: Offset-based pagination metadata included in list responses.
+      properties:
+        offset:
+          type: number
+          description: Zero-based offset of the first item in the current page.
+        limit:
+          type: number
+          description: Maximum number of items requested for this page.
+        nextOffset:
+          type: number
+          description: Offset to use for the next page. Absent when there are no more pages.
+        totalCount:
+          type: number
+          description: Total number of items across all pages. May be absent if the total is unknown.
+      required:
+      - limit
+      - offset
+    PremiumBand:
+      type: object
+      description: 'A premium-amount tier that qualifies a contract into a specific rate band.
+
+
+        Invariants (enforced by the server, not the schema):
+
+        - `premiumFrom` of each band must be strictly greater than `premiumTo` of the previous band.
+
+        - No two bands may share an overlapping premium range.
+
+        - Together the bands should cover the full intended premium range without gaps.'
+      properties:
+        id:
+          type: string
+          description: Stable identifier referenced by Rate API payloads.
+        premiumFrom:
+          type: number
+          description: Minimum premium (inclusive) required to qualify for this band.
+          format: double
+        premiumTo:
+          type: number
+          description: 'Maximum premium (inclusive) for this band.
+
+            When absent there is no upper limit.'
+          format: double
+      required:
+      - id
+      - premiumFrom
+    Product:
+      type: object
+      description: Full product record as stored in the Product Dictionary.
+      properties:
+        id:
+          type: string
+          description: Internal stable identifier for this product record.
+        idSource:
+          $ref: '#/components/schemas/IdSource'
+        displayName:
+          type: string
+          description: Human-readable product name.
+        variationId:
+          type: string
+          description: Populated only when this record is a variation of a generic product.
+        associatedFirmCode:
+          type: string
+          description: Standard member code identifier to represent a distributor-specific variation.
+        associatedFirmName:
+          type: string
+          description: Human-readable name of the member / distributor.
+        effectiveDate:
+          type: string
+          format: date
+          description: Date the product became available for new business (yyyy-MM-dd).
+        expiryDate:
+          type: string
+          format: date
+          description: 'Date after which the product is no longer available for new business (yyyy-MM-dd).
+
+            Absent means open-ended.'
+        applicableJurisdictions:
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Z]{2}-[A-Z0-9]{1,3}$
+            description: ISO 3166-2 jurisdiction code — always country + subdivision (e.g. "US-CA", "US-TX").
+          description: 'ISO 3166-2 jurisdiction codes in which the product is available.
+
+            When absent the product is assumed available in all jurisdictions.'
+        surrenderPeriods:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurrenderPeriod'
+          minItems: 1
+        premiumBands:
+          type: array
+          items:
+            $ref: '#/components/schemas/PremiumBand'
+          minItems: 1
+        strategies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Strategy'
+          minItems: 1
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feature'
+      required:
+      - displayName
+      - effectiveDate
+      - id
+      - idSource
+      - premiumBands
+      - strategies
+      - surrenderPeriods
+    Strategy:
+      type: object
+      description: A crediting strategy available on the product (e.g. "1-Year Point-to-Point").
+      properties:
+        id:
+          type: string
+          description: Stable identifier referenced by Rate API payloads.
+        displayName:
+          type: string
+          description: Human-readable strategy name.
+        effectiveDate:
+          type: string
+          format: date
+          description: Date the strategy became available (yyyy-MM-dd).
+        expiryDate:
+          type: string
+          format: date
+          description: Date the strategy is no longer available (yyyy-MM-dd). Absent means open-ended.
+        applicableJurisdictions:
+          type: array
+          items:
+            type: string
+            pattern: ^[A-Z]{2}-[A-Z0-9]{1,3}$
+            description: ISO 3166-2 jurisdiction code — always country + subdivision (e.g. "US-CA", "US-TX").
+          description: 'ISO 3166-2 jurisdiction codes in which the strategy is available.
+
+            When absent the strategy is available in all jurisdictions.'
+      required:
+      - displayName
+      - effectiveDate
+      - id
+    SurrenderPeriod:
+      type: object
+      description: A named surrender-charge period associated with a product.
+      properties:
+        id:
+          type: string
+          description: Stable identifier referenced by Rate API payloads.
+        period:
+          type: string
+          pattern: ^(2[0-5]|1[0-9]|[0-9])y$
+          description: Duration in years (e.g. "0y", "3y", "10y") up to 25y.
+      required:
+      - id
+      - period
