@@ -2,6 +2,14 @@
 
 The goal is to establish industry-wide standards for rate APIs used in the annuity market, enabling consistent, secure and efficient transmission of product rates between carriers, distributors and third-party vendors. Standardizing these APIs will reduce operational friction, improve data accuracy, shorten product update cycles, and enhance the experience for financial professionals and customers.
 
+## Documentation
+
+- [Strategy Representation Standard](docs/strategy-representation-standard.md) — Approved component types and canonical strategy representations
+- [Governance](docs/GOVERNANCE.md) — Governance committee, change process, and canonical representation enforcement
+- [Contributing](docs/CONTRIBUTING.md) — How to get involved, report issues, and propose new strategy representations
+
+___
+
 ## The Problems these APIs will solve
 Currently, the industry lacks a common standard for transmitting rate updates across carriers, distributors, and technology providers.  This creates multiple challenges:
 - **Inefficiency** – Each carrier and service provider uses proprietary formats and processes, requiring duplicative integration work for each carrier, distributor or vendor
@@ -77,13 +85,5 @@ Day 2 items to be prioritized and better defined later:
    - Example: a client elects a GWBL rider where accumulation rate is 6% and withdrawal rate is 7%.
 
 ## How to engage, contribute, and give feedback
-- These working groups are being coordinated by Nicholas Palmer <Nicholas.Palmer@icapital.com>** (Champion) and Sheldon DSouza <sheldon.dsouza@icapital.com>** (Tech-Champion).
-- Please contact the business owners or IRI (hpikus@irionline.org or mhendrickson@irionline.org) to get added to the working group discussions.
 
-## Change submissions and reporting issues and bugs
-
-Security issues and bugs should be reported directly to Hannah Pikus at hpikus@irionline.org and Matt Hendrickson at mhendrickson@irionline.org. Issues and bugs can be reported directly within the issues tab of a repository. Change requests should follow the standards governance workflow outlined on the [main page](https://github.com/Insured-Retirement-Institute).
-
-## Code of conduct
-
-See [Digital-First-Specifications](https://github.com/Insured-Retirement-Institute/Digital-First-Specifications) repository
+See [Contributing](docs/CONTRIBUTING.md) for how to get involved, report issues, and propose changes. For the governance process and committee details, see [Governance Process](docs/GOVERNANCE.md). For community standards, see [Code of Conduct](docs/CODE_OF_CONDUCT.md).
