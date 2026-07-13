@@ -6,11 +6,19 @@ The goal is to establish industry-wide standards for rate APIs used in the annui
 
 ## Draft API Specifications
 
-The working group's draft OpenAPI specification is in the [wip_spec](./wip_spec) directory.  See [README.md](wip_spec/README.md) for more details.
+The working group's draft OpenAPI specification is [rate-api-v0.0.1.yaml](rate-api-v0.0.1.yaml).
 
 ## Draft Business Case
 
 The working group's draft business case documentation is available in this repository. Once the documentation is finalized, it will be formally published on the [IRI DFA Library of Standards](https://www.irionline.org/member-programs/operations-technology/digital-first-library-standards/).
+
+## Documentation
+
+- [Strategy Representation Standard](docs/strategy-representation-standard.md) — Approved component types and canonical strategy representations
+- [Governance](docs/GOVERNANCE.md) — Governance committee, change process, and canonical representation enforcement
+- [Contributing](docs/CONTRIBUTING.md) — How to get involved, report issues, and propose new strategy representations
+
+___
 
 ## The Problems these APIs will solve
 Currently, the industry lacks a common standard for transmitting rate updates across carriers, distributors, and technology providers.  This creates multiple challenges:
@@ -87,13 +95,5 @@ Day 2 items to be prioritized and better defined later:
    - Example: a client elects a GWBL rider where accumulation rate is 6% and withdrawal rate is 7%.
 
 ## How to engage, contribute, and give feedback
-- These working groups are being coordinated by Nicholas Palmer <Nicholas.Palmer@icapital.com>** (Champion) and Sheldon DSouza <sheldon.dsouza@icapital.com>** (Tech-Champion).
-- Please contact the business owners or IRI (hpikus@irionline.org or mhendrickson@irionline.org) to get added to the working group discussions.
 
-## Change submissions and reporting issues and bugs
-
-Security issues and bugs should be reported directly to Hannah Pikus at hpikus@irionline.org and Matt Hendrickson at mhendrickson@irionline.org. Issues and bugs can be reported directly within the issues tab of a repository. Change requests should follow the standards governance workflow outlined on the [main page](https://github.com/Insured-Retirement-Institute).
-
-## Code of conduct
-
-See [Digital-First-Specifications](https://github.com/Insured-Retirement-Institute/Digital-First-Specifications) repository
+See [Contributing](docs/CONTRIBUTING.md) for how to get involved, report issues, and propose changes. For the governance process and committee details, see [Governance Process](docs/GOVERNANCE.md). For community standards, see [Code of Conduct](docs/CODE_OF_CONDUCT.md).
