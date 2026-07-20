@@ -1,6 +1,16 @@
 # Rate APIs
 
+> **NOTE:** This repository is for the working group to use while drafting documentation and specifications before they are formally ratified.  Users outside of the working group should not begin implementing solutions based on the content in this repository as it is likely to change without notice.
+
 The goal is to establish industry-wide standards for rate APIs used in the annuity market, enabling consistent, secure and efficient transmission of product rates between carriers, distributors and third-party vendors. Standardizing these APIs will reduce operational friction, improve data accuracy, shorten product update cycles, and enhance the experience for financial professionals and customers.
+
+## Draft API Specifications
+
+The working group's draft OpenAPI specification is in the [draft-api-specs](./draft-api-specs) directory.  See [README.md](draft-api-specs/README.md) for more details.
+
+## Draft Business Case
+
+The working group's draft business case documentation is available in this repository. Once the documentation is finalized, it will be formally published on the [IRI DFA Library of Standards](https://www.irionline.org/member-programs/operations-technology/digital-first-library-standards/).
 
 ## Documentation
 
