@@ -26,7 +26,7 @@
 The API documentation lives in three places that must be kept consistent:
 
 1. **`docs/strategy-representation-standard.md`** — public-facing markdown mirror of the upstream governance document. This is the canonical public reference for component types, design principles, and the Approved Strategy Representation Catalog.
-2. **`rate-api-v0.0.1.yaml`** — the OpenAPI spec. Schema `description` fields and `info.description` contain inline summaries that reference the docs file.
+2. **`draft-api-specs/rate-api-v0.0.1.yaml`** — the OpenAPI spec. Schema `description` fields and `info.description` contain inline summaries that reference the docs file.
 3. **Upstream governance source** — the IRI governance committee maintains the authoritative standard; changes flow into this repo via the IRI standards workflow.
 
 ### When the governance standard changes

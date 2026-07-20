@@ -6,7 +6,7 @@ The goal is to establish industry-wide standards for rate APIs used in the annui
 
 ## Draft API Specifications
 
-The working group's draft OpenAPI specification is [rate-api-v0.0.1.yaml](rate-api-v0.0.1.yaml).
+The working group's draft OpenAPI specification is in the [draft-api-specs](./draft-api-specs) directory.  See [README.md](draft-api-specs/README.md) for more details.
 
 ## Draft Business Case
 
