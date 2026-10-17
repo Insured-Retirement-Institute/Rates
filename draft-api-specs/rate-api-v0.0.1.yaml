@@ -474,6 +474,9 @@ components:
           description: Internal stable identifier for this product record.
         idSource:
           $ref: '#/components/schemas/IdSource'
+        revisionId:
+          type: string
+          description: Identifier of this revision of the product record. For troubleshooting and referencing a specific revision.
         displayName:
           type: string
           description: Human-readable product name.
@@ -530,6 +533,7 @@ components:
       - id
       - idSource
       - premiumBands
+      - revisionId
       - strategies
       - surrenderPeriods
     ProductRate:
@@ -552,6 +556,9 @@ components:
           description: Product identifier. Where its definition is referenced from is indicated by referenceSource.
         referenceSource:
           $ref: '#/components/schemas/ReferenceSource'
+        revisionId:
+          type: string
+          description: Identifier of this revision of the rate entry. For troubleshooting and referencing a specific rate revision.
         variationId:
           type: string
           description: Distributor- or carrier-specific product variation identifier.
@@ -625,6 +632,7 @@ components:
       - modified
       - rates
       - referenceSource
+      - revisionId
       - scope
     RateComponent:
       type: object
