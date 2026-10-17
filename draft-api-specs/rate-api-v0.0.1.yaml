@@ -172,6 +172,11 @@ paths:
         and strategy identifiers in the response.
 
 
+        To poll for changes, use `modifiedFrom` / `modifiedTo` with an overlapping
+
+        trailing window and idempotent upserts. See docs/push-and-pull-mechanisms.md.
+
+
         All query parameters accept a single value only. If a query parameter is
 
         repeated (e.g. `?scope=NEW_BUSINESS&scope=GMIR`), the server will reject
@@ -204,6 +209,27 @@ paths:
           description: 'Effective date filter (yyyy-MM-dd). Returns the rate effective on this date.
 
             Single value only.'
+      - name: modifiedFrom
+        in: query
+        description: >-
+          Return entries whose `modified` is at or after this instant (RFC 3339
+          date-time, UTC offset mandatory). Does not imply an effective-date
+          filter: entries with a future `effectiveDate` are returned. Single value
+          only.
+        schema:
+          type: string
+          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$
+      - name: modifiedTo
+        in: query
+        description: >-
+          Return entries whose `modified` is at or before this instant (RFC 3339
+          date-time, UTC offset mandatory). Does not imply an effective-date
+          filter. Single value only.
+        schema:
+          type: string
+          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$
       - name: correlationId
         in: header
         description: Optional correlation identifier for cross-system tracing.
@@ -511,12 +537,21 @@ components:
       description: 'A rate entry for a single product covering one or more surrender period /
 
         premium band combinations and their associated strategy components.'
+      if:
+        properties:
+          referenceSource:
+            const: acord
+        required:
+        - referenceSource
+      then:
+        required:
+        - premiumBands
       properties:
         id:
           type: string
-          description: Product identifier. The source system is indicated by idSource.
-        idSource:
-          $ref: '#/components/schemas/RateIdSource'
+          description: Product identifier. Where its definition is referenced from is indicated by referenceSource.
+        referenceSource:
+          $ref: '#/components/schemas/ReferenceSource'
         variationId:
           type: string
           description: Distributor- or carrier-specific product variation identifier.
@@ -548,11 +583,33 @@ components:
         created:
           type: string
           format: date-time
-          description: Timestamp when this rate entry was created. For downstream change tracking.
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$
+          description: >-
+            Instant when this rate entry was created (RFC 3339 date-time; the UTC
+            offset is mandatory, e.g. `2026-09-20T16:50:00Z`). For downstream
+            change tracking. On creation, `created` equals `modified`.
         modified:
           type: string
           format: date-time
-          description: Timestamp when this rate entry was last modified. For downstream change tracking.
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$
+          description: >-
+            Instant when this rate entry was last modified (RFC 3339 date-time; the
+            UTC offset is mandatory, e.g. `2026-09-20T16:50:00Z`). For downstream
+            change tracking. Set to the actual instant of modification. Advances
+            only when a consumer-visible rate value changes (a cosmetic republish
+            must not advance it), never decreases, and is always at or after
+            `created`.
+        premiumBands:
+          type: array
+          items:
+            $ref: '#/components/schemas/PremiumBand'
+          minItems: 1
+          description: >-
+            Premium band definitions that this rate's `bandId` values resolve
+            against. Normally sourced from the Product Dictionary and omitted here.
+            REQUIRED when `referenceSource` is `acord`, because the ACORD spec does
+            not capture premium bands, so the payload must carry them to be
+            self-contained.
         rates:
           type: array
           items:
@@ -565,9 +622,9 @@ components:
       - created
       - effectiveDate
       - id
-      - idSource
       - modified
       - rates
+      - referenceSource
       - scope
     RateComponent:
       type: object
@@ -614,9 +671,9 @@ components:
       - bandId
       - strategies
       - surrenderPeriodId
-    RateIdSource:
+    ReferenceSource:
       type: string
-      description: Source system for the product identifier in a rate entry.
+      description: Where the product definition referenced by a rate entry should be looked up.
       enum:
       - productDictionary
       - acord
