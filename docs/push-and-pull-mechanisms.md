@@ -15,7 +15,10 @@ This document defines how solution providers (such as iCapital) receive rate cha
 The two models differ in who starts the conversation.
 
 - **Pull (polling):** the solution provider reaches out to the carrier's rate API on a schedule it controls and asks one question: *what has changed since my last check?*
+![How polling works: on a schedule the solution provider asks the carrier what changed since its last check, the carrier returns every new, future or corrected rate, and the solution provider saves the updates and repeats on its next run](images/pull-polling-flow.png)
+
 - **Push:** the direction flips. Instead of solution providers asking, each carrier notifies them as soon as a rate is published or corrected.
+![How a push API would work: when a rate changes each carrier sends the update right away, the solution provider confirms receipt, and the carrier retries if no confirmation arrives](images/push-flow.png)
 
 ## Push mechanics
 
